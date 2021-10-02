@@ -24,6 +24,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import subprocess
 import psutil
 from typing import List  # noqa: F401
@@ -42,6 +43,9 @@ from libqtile.config import (
     ScratchPad,
 )
 from libqtile.lazy import lazy
+
+
+XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.environ["HOME"] + "/.config")
 
 
 def get_group(group_name):
@@ -434,6 +438,8 @@ battery = MyBattery(
 
 screens = [
     Screen(
+        wallpaper=XDG_CONFIG_HOME + "/qtile/onedark.png",
+        wallpaper_mode="fill",
         top=bar.Bar(
             [
                 # widget.CurrentLayout(),
