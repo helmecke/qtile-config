@@ -42,6 +42,7 @@ from libqtile.config import (
     DropDown,
     ScratchPad,
 )
+import xmonad
 from libqtile.lazy import lazy
 
 
@@ -53,25 +54,6 @@ def get_group(group_name):
         if group.name == group_name:
             return group
     return None
-
-
-def focus_master(qtile):
-    cur = qtile.current_layout.clients.current_client
-    master = qtile.current_layout.clients[0]
-    last = qtile.current_layout.group.focus_history[-2]
-
-    if cur == master:
-        return qtile.current_layout.group.focus(last)
-
-    return qtile.current_layout.group.focus(master)
-
-
-def swap_master(qtile):
-    cur = qtile.current_layout.clients.current_client
-    master = qtile.current_layout.clients[0]
-
-    qtile.current_layout.clients.swap(cur, master, 0)
-    return qtile.current_layout.group.focus(qtile.current_layout.clients[0])
 
 
 def toscreen(qtile, group_name):
@@ -136,43 +118,18 @@ colors = {
 keys = [
     Key([mod], "j", lazy.layout.down()),
     Key([mod], "k", lazy.layout.up()),
-    Key([mod, shift], "h", lazy.layout.shrink_main()),
-    Key([mod, shift], "l", lazy.layout.grow_main()),
     Key([mod, shift], "j", lazy.layout.shuffle_down()),
     Key([mod, shift], "k", lazy.layout.shuffle_up()),
-    Key([mod], "h", lazy.layout.shrink()),
-    Key([mod], "l", lazy.layout.grow()),
-    Key([mod], "n", lazy.layout.normalize()),
-    Key([mod, shift], "n", lazy.layout.reset()),
-    Key([mod], "m", lazy.layout.maximize()),
-    Key([mod, ctrl], "Return", lazy.layout.flip()),
-    Key([mod], "space", lazy.function(focus_master)),
-    Key([mod, shift], "space", lazy.function(swap_master)),
-    # Focus windows
-    # Key([mod], "h", lazy.layout.left()),
-    # Key([mod], "l", lazy.layout.right()),
-    # Key([mod], "j", lazy.layout.down()),
-    # Key([mod], "k", lazy.layout.up()),
-    # # Move windows
-    # Key([mod, shift], "h", lazy.layout.shuffle_left()),
-    # Key([mod, shift], "l", lazy.layout.shuffle_right()),
-    # Key([mod, shift], "j", lazy.layout.shuffle_down()),
-    # Key([mod, shift], "k", lazy.layout.shuffle_up()),
-    # # Resize windows
-    # Key([mod, ctrl], "h", lazy.layout.grow_left()),
-    # Key([mod, ctrl], "l", lazy.layout.grow_right()),
-    # Key([mod, ctrl], "j", lazy.layout.grow_down()),
-    # Key([mod, ctrl], "k", lazy.layout.grow_up()),
-    # Key([mod, shift, ctrl], "h", lazy.layout.swap_column_left()),
-    # Key([mod, shift, ctrl], "l", lazy.layout.swap_column_right()),
-    # Key([mod], "n", lazy.layout.normalize()),
-    # Key([mod], "m", lazy.layout.toggle_split()),
-    # Key(
-    #     [mod, ctrl],
-    #     "Return",
-    #     lazy.layout.toggle_split(),
-    #     desc="Toggle between split and unsplit sides of stack",
-    # ),
+    Key([mod], "h", lazy.layout.shrink_master()),
+    Key([mod], "l", lazy.layout.grow_master()),
+    Key([mod], "n", lazy.layout.reset()),
+    Key([mod], "y", lazy.layout.flip()),
+    Key([mod, shift], "y", lazy.layout.flip_master()),
+    Key([mod], "comma", lazy.layout.decrease_nmaster()),
+    Key([mod], "period", lazy.layout.increase_nmaster()),
+    Key([mod], "space", lazy.layout.master()),
+    Key([mod, shift], "space", lazy.layout.swap_master()),
+
     Key([mod, ctrl], "space", lazy.window.toggle_floating()),
     Key([mod, ctrl], "n", lazy.window.toggle_minimize()),
     Key([mod, ctrl], "f", lazy.window.toggle_fullscreen()),
@@ -362,16 +319,13 @@ keys.extend(
 )
 
 layouts = [
-    layout.MonadTall(
+    xmonad.MonadTall(
         border_focus=colors["blue"],
         border_normal=colors["comment_grey"],
-        new_client_position="top",
-        ratio=0.6,
     ),
-    layout.MonadWide(
+    xmonad.MonadWide(
         border_focus=colors["blue"],
         border_normal=colors["comment_grey"],
-        new_client_position="top",
     ),
     layout.Columns(
         **layout_defaults,
@@ -436,34 +390,42 @@ battery = MyBattery(
     notify_below=12,
 )
 
+widgets = [
+    widget.CurrentLayoutIcon(scale=0.8),
+    widget.GroupBox(
+        highlight_method="block",
+        rounded=False,
+        spacing=0,
+        this_current_screen_border=colors["blue"],
+        other_screen_border=colors["dark_yellow"],
+    ),
+    widget.Prompt(),
+    widget.WindowName(),
+    widget.Chord(
+        chords_colors={
+            "launch": (colors["red"], colors["white"]),
+        },
+        name_transform=lambda name: name.upper(),
+    ),
+    widget.PulseVolume(fmt=" {}", emoji=True, volume_app="pavucontrol"),
+    widget.PulseVolume(volume_app="pavucontrol"),
+    widget.Spacer(length=2),
+    widget.Clock(format=" %H:%M  %d.%m.%Y"),
+]
+
+primary_widgets = widgets
+primary_widgets.insert(-2, widget.Systray())
+
+if os.path.isfile("/sys/class/power_supply/BAT0"):
+    widgets.append(battery)
+
+
 screens = [
     Screen(
         wallpaper=XDG_CONFIG_HOME + "/qtile/onedark.png",
         wallpaper_mode="fill",
         top=bar.Bar(
-            [
-                # widget.CurrentLayout(),
-                widget.CurrentLayoutIcon(scale=0.8),
-                widget.GroupBox(
-                    highlight_method="block",
-                    rounded=False,
-                    spacing=0,
-                    this_current_screen_border=colors["blue"],
-                    other_screen_border=colors["dark_yellow"],
-                ),
-                widget.Prompt(),
-                widget.WindowName(),
-                widget.Chord(
-                    chords_colors={
-                        "launch": (colors["red"], colors["white"]),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.Systray(),
-                battery,
-                widget.Spacer(length=2),
-                widget.Clock(format=" %H:%M  %d.%m.%Y"),
-            ],
+            primary_widgets,
             24,
             background=colors["black"],
             margin=2,
