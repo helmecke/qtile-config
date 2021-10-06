@@ -123,6 +123,7 @@ keys = [
     Key([mod], "h", lazy.layout.shrink_master()),
     Key([mod], "l", lazy.layout.grow_master()),
     Key([mod], "n", lazy.layout.reset()),
+    Key([mod], "m", lazy.layout.maximize()),
     Key([mod], "y", lazy.layout.flip()),
     Key([mod, shift], "y", lazy.layout.flip_master()),
     Key([mod], "comma", lazy.layout.decrease_nmaster()),
@@ -243,7 +244,6 @@ groups.extend(
         Group(
             "www",
             label=" ",
-            layout="max",
             persist=False,
             init=False,
             matches=[Match(wm_class=["qutebrowser", "firefox"])],
@@ -284,15 +284,6 @@ groups.append(
     )
 )
 
-layout_defaults = dict(
-    border_focus=colors["blue"],
-    border_normal=colors["comment_grey"],
-    border_focus_stack=colors["green"],
-    border_normal_stack=colors["comment_grey"],
-    border_on_single=True,
-    border_width=2,
-)
-
 keys.extend(
     [
         # Key([mod], "s", lazy.group["chat"].toscreen()),
@@ -318,21 +309,14 @@ keys.extend(
     ]
 )
 
+layout_defaults = dict(
+    border_focus=colors["blue"],
+    border_normal=colors["comment_grey"],
+)
+
 layouts = [
-    xmonad.MonadTall(
-        border_focus=colors["blue"],
-        border_normal=colors["comment_grey"],
-    ),
-    xmonad.MonadWide(
-        border_focus=colors["blue"],
-        border_normal=colors["comment_grey"],
-    ),
-    layout.Columns(
-        **layout_defaults,
-        num_columns=1,
-        split=False,
-        name="max",
-    ),
+    xmonad.MonadTall(**layout_defaults),
+    xmonad.MonadWide(**layout_defaults),
 ]
 
 widget_defaults = dict(

@@ -180,6 +180,7 @@ class MonadTall(_SimpleLayoutBase):
             "will be moved to the slave stack."),
         ("orientation", _vert, "Orientation in which master windows will be "
             "placed (one of ``MonadTall._vert`` or ``MonadTall._hori``)"),
+        ("maximized", False, "Start maximized"),
     ]
 
     def __init__(self, **config):
@@ -284,12 +285,10 @@ class MonadTall(_SimpleLayoutBase):
 
     def cmd_maximize(self):
         "Grow the currently focused client to the max size"
-        # if we have 1 or 2 panes or master pane is focused
-        if len(self.clients) < 3 or self.focused == 0:
-            self._maximize_master()
-        # slave is focused
+        if self.maximized:
+            self.maximized = False
         else:
-            self._maximize_slave()
+            self.maximized = True
         self.group.layout_all()
 
     def configure(self, client, screen_rect):
@@ -312,17 +311,20 @@ class MonadTall(_SimpleLayoutBase):
             px = self.border_normal
 
         # single client - fullscreen
-        if len(self.clients) == 1:
-            client.place(
-                self.screen_rect.x,
-                self.screen_rect.y,
-                self.screen_rect.width - 2 * self.single_border_width,
-                self.screen_rect.height - 2 * self.single_border_width,
-                self.single_border_width,
-                px,
-                margin=self.single_margin,
-            )
-            client.unhide()
+        if len(self.clients) == 1 or self.maximized:
+            if self.clients and client is self.clients.current_client:
+                client.place(
+                    self.screen_rect.x,
+                    self.screen_rect.y,
+                    self.screen_rect.width - 2 * self.single_border_width,
+                    self.screen_rect.height - 2 * self.single_border_width,
+                    self.single_border_width,
+                    px,
+                    margin=self.single_margin,
+                )
+                client.unhide()
+            else:
+                client.hide()
             return
 
         cidx = self.clients.index(client)
