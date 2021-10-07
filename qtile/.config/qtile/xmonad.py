@@ -42,10 +42,9 @@ class MonadTall(_SimpleLayoutBase):
 
     Master-Pane:
 
-    A master pane that contains a single window takes up a vertical portion of
+    A master pane that contains a set number of windows takes up a vertical portion of
     the screen_rect based on the ratio setting. This ratio can be adjusted with
-    the ``cmd_grow_master`` and ``cmd_shrink_master`` or, while the master pane is in
-    focus, ``cmd_grow`` and ``cmd_shrink``.
+    the ``cmd_grow_master`` and ``cmd_shrink_master``.
 
     ::
 
@@ -74,22 +73,19 @@ class MonadTall(_SimpleLayoutBase):
 
     Slave-panes:
 
-    Occupying the rest of the screen_rect are one or more slave panes.  The
-    slave panes will share the vertical space of the screen_rect however
-    they can be resized at will with the ``cmd_grow`` and ``cmd_shrink``
-    methods.  The other slave panes will adjust their sizes to smoothly fill
-    all of the space.
+    Occupying the rest of the screen_rect are one or more slave panes. The
+    slave panes will share the vertical space of the screen_rect.
 
     ::
 
-        ---------------------          ---------------------
-        |            |      |          |            |______|
-        |            |______|          |            |      |
-        |            |      |          |            |      |
-        |            |______|          |            |      |
-        |            |      |          |            |______|
-        |            |      |          |            |      |
-        ---------------------          ---------------------
+        ---------------------
+        |            |      |
+        |            |______|
+        |            |      |
+        |            |______|
+        |            |      |
+        |            |      |
+        ---------------------
 
     Panes can be moved with the ``cmd_shuffle_up`` and ``cmd_shuffle_down``
     methods. As mentioned the master pane is considered the top of the stack;
@@ -111,32 +107,37 @@ class MonadTall(_SimpleLayoutBase):
 
     Normalizing/Resetting:
 
-    To restore all slave client windows to their default size ratios
-    use the ``cmd_normalize`` method.
+    To restore master slave ratio use the ``cmd_normalize`` method.
 
-    To reset all client windows to their default sizes, including the primary
-    window, use the ``cmd_reset`` method.
+    To reset the layout to its default state, including the master
+    windows, master slave ratio and flip, use the ``cmd_reset`` method.
 
     Maximizing:
 
-    To toggle a client window between its minimum and maximum sizes
-    simply use the ``cmd_maximize`` on a focused client.
+    To toggle a maximized layout, showing a single window, simply use the
+    ``cmd_maximize`` on a focused client.
 
     Suggested Bindings::
+        # these mirror the xmonad default config
 
-        Key([modkey], "h", lazy.layout.left()),
-        Key([modkey], "l", lazy.layout.right()),
         Key([modkey], "j", lazy.layout.down()),
         Key([modkey], "k", lazy.layout.up()),
-        Key([modkey, "shift"], "h", lazy.layout.swap_left()),
-        Key([modkey, "shift"], "l", lazy.layout.swap_right()),
         Key([modkey, "shift"], "j", lazy.layout.shuffle_down()),
         Key([modkey, "shift"], "k", lazy.layout.shuffle_up()),
-        Key([modkey], "i", lazy.layout.grow()),
-        Key([modkey], "m", lazy.layout.shrink()),
+        Key([modkey], "h", lazy.layout.shink_master()),
+        Key([modkey], "l", lazy.layout.grow_master()),
         Key([modkey], "n", lazy.layout.normalize()),
-        Key([modkey], "o", lazy.layout.maximize()),
-        Key([modkey, "shift"], "space", lazy.layout.flip()),
+        Key([modkey], "m", lazy.layout.master()),
+        Key([modkey], "comma", lazy.layout.decrease_nmaster()),
+        Key([modkey], "period", lazy.layout.increase_nmaster()),
+        Key([modkey], "Return", lazy.layout.swap_master())
+
+        # keybindings not in xmonad default config
+
+        Key([modkey, "shift"], "n", lazy.layout.reset()),
+        Key([modkey], "space", lazy.layout.flip()),
+        Key([modkey, "shift"], "space", lazy.layout.flip_master()),
+        Key([modkey, "shift"], "m", lazy.layout.maximize()),
     """
 
     _left = 0
@@ -479,8 +480,7 @@ class MonadWide(MonadTall):
 
     A master pane that contains a single window takes up a horizontal
     portion of the screen_rect based on the ratio setting. This ratio can be
-    adjusted with the ``cmd_grow_master`` and ``cmd_shrink_master`` or,
-    while the master pane is in focus, ``cmd_grow`` and ``cmd_shrink``.
+    adjusted with the ``cmd_grow_master`` and ``cmd_shrink_master`` or.
 
     ::
 
@@ -511,21 +511,18 @@ class MonadWide(MonadTall):
     Slave-panes:
 
     Occupying the rest of the screen_rect are one or more slave panes.
-    The slave panes will share the horizontal space of the screen_rect
-    however they can be resized at will with the ``cmd_grow`` and
-    ``cmd_shrink`` methods. The other slave panes will adjust their
-    sizes to smoothly fill all of the space.
+    The slave panes will share the horizontal space of the screen_rect.
 
     ::
 
-        ---------------------          ---------------------
-        |                   |          |                   |
-        |                   |          |                   |
-        |                   |          |                   |
-        |___________________|          |___________________|
-        |     |       |     |          |   |           |   |
-        |     |       |     |          |   |           |   |
-        ---------------------          ---------------------
+        ---------------------
+        |                   |
+        |                   |
+        |                   |
+        |___________________|
+        |     |       |     |
+        |     |       |     |
+        ---------------------
 
     Panes can be moved with the ``cmd_shuffle_up`` and ``cmd_shuffle_down``
     methods. As mentioned the master pane is considered the top of the
@@ -546,33 +543,37 @@ class MonadWide(MonadTall):
 
     Normalizing/Resetting:
 
-    To restore all slave client windows to their default size ratios
-    use the ``cmd_normalize`` method.
+    To restore master slave ratio use the ``cmd_normalize`` method.
 
-    To reset all client windows to their default sizes, including the primary
-    window, use the ``cmd_reset`` method.
-
+    To reset the layout to its default state, including the master
+    windows, master slave ratio and flip, use the ``cmd_reset`` method.
 
     Maximizing:
 
-    To toggle a client window between its minimum and maximum sizes
-    simply use the ``cmd_maximize`` on a focused client.
+    To toggle a maximized layout, showing a single window, simply use the
+    ``cmd_maximize`` on a focused client.
 
     Suggested Bindings::
+        # these mirror the xmonad default config
 
-        Key([modkey], "h", lazy.layout.left()),
-        Key([modkey], "l", lazy.layout.right()),
         Key([modkey], "j", lazy.layout.down()),
         Key([modkey], "k", lazy.layout.up()),
-        Key([modkey, "shift"], "h", lazy.layout.swap_left()),
-        Key([modkey, "shift"], "l", lazy.layout.swap_right()),
         Key([modkey, "shift"], "j", lazy.layout.shuffle_down()),
         Key([modkey, "shift"], "k", lazy.layout.shuffle_up()),
-        Key([modkey], "i", lazy.layout.grow()),
-        Key([modkey], "m", lazy.layout.shrink()),
+        Key([modkey], "h", lazy.layout.shink_master()),
+        Key([modkey], "l", lazy.layout.grow_master()),
         Key([modkey], "n", lazy.layout.normalize()),
-        Key([modkey], "o", lazy.layout.maximize()),
-        Key([modkey, "shift"], "space", lazy.layout.flip()),
+        Key([modkey], "m", lazy.layout.master()),
+        Key([modkey], "comma", lazy.layout.decrease_nmaster()),
+        Key([modkey], "period", lazy.layout.increase_nmaster()),
+        Key([modkey], "Return", lazy.layout.swap_master())
+
+        # keybindings not in xmonad default config
+
+        Key([modkey, "shift"], "n", lazy.layout.reset()),
+        Key([modkey], "space", lazy.layout.flip()),
+        Key([modkey, "shift"], "space", lazy.layout.flip_master()),
+        Key([modkey, "shift"], "m", lazy.layout.maximize()),
     """
 
     _up = 0
