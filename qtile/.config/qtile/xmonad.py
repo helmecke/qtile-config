@@ -252,37 +252,6 @@ class MonadTall(_SimpleLayoutBase):
             self.align = self._vert
         self.cmd_normalize(redraw)
 
-    def _maximize_master(self):
-        "Toggle the master pane between min and max size"
-        if self.ratio <= self._med_ratio:
-            self.ratio = self.max_ratio
-        else:
-            self.ratio = self.min_ratio
-        self.group.layout_all()
-
-    def _maximize_slave(self):
-        "Toggle the focused slave pane between min and max size"
-        n = len(self.clients) - 2  # total shrinking clients
-        # total size of collapsed secondaries
-        collapsed_size = self.min_slave_size * n
-        nidx = self.focused - 1  # focused size index
-        # total height of maximized slave
-        maxed_size = self.group.screen.dheight - collapsed_size
-        # if maximized or nearly maximized
-        if abs(
-            self._get_absolute_size_from_relative(self.relative_sizes[nidx]) -
-            maxed_size
-        ) < self.change_size:
-            # minimize
-            self._shrink_slave(
-                self._get_absolute_size_from_relative(
-                    self.relative_sizes[nidx]
-                ) - self.min_slave_size
-            )
-        # otherwise maximize
-        else:
-            self._grow_slave(maxed_size)
-
     def cmd_maximize(self):
         "Grow the currently focused client to the max size"
         if self.maximized:
@@ -417,176 +386,10 @@ class MonadTall(_SimpleLayoutBase):
         ))
         return d
 
-    def get_shrink_margin(self, cidx):
-        "Return how many remaining pixels a client can shrink"
-        return max(
-            0,
-            self._get_absolute_size_from_relative(
-                self.relative_sizes[cidx]
-            ) - self.min_slave_size
-        )
-
-    def shrink(self, cidx, amt):
-        """Reduce the size of a client
-
-        Will only shrink the client until it reaches the configured minimum
-        size. Any amount that was prevented in the resize is returned.
-        """
-        # get max resizable amount
-        margin = self.get_shrink_margin(cidx)
-        if amt > margin:  # too much
-            self.relative_sizes[cidx] -= \
-                self._get_relative_size_from_absolute(margin)
-            return amt - margin
-        else:
-            self.relative_sizes[cidx] -= \
-                self._get_relative_size_from_absolute(amt)
-            return 0
-
-    def shrink_up(self, cidx, amt):
-        """Shrink the window up
-
-        Will shrink all slave clients above the specified index in order.
-        Each client will attempt to shrink as much as it is able before the
-        next client is resized.
-
-        Any amount that was unable to be applied to the clients is returned.
-        """
-        left = amt  # track unused shrink amount
-        # for each client before specified index
-        for idx in range(0, cidx):
-            # shrink by whatever is left-over of original amount
-            left -= left - self.shrink(idx, left)
-        # return unused shrink amount
-        return left
-
-    def shrink_up_shared(self, cidx, amt):
-        """Shrink the shared space
-
-        Will shrink all slave clients above the specified index by an equal
-        share of the provided amount. After applying the shared amount to all
-        affected clients, any amount left over will be applied in a non-equal
-        manner with ``shrink_up``.
-
-        Any amount that was unable to be applied to the clients is returned.
-        """
-        # split shrink amount among number of clients
-        per_amt = amt / cidx
-        left = amt  # track unused shrink amount
-        # for each client before specified index
-        for idx in range(0, cidx):
-            # shrink by equal amount and track left-over
-            left -= per_amt - self.shrink(idx, per_amt)
-        # apply non-equal shrinkage slave pass
-        # in order to use up any left over shrink amounts
-        left = self.shrink_up(cidx, left)
-        # return whatever could not be applied
-        return left
-
-    def shrink_down(self, cidx, amt):
-        """Shrink current window down
-
-        Will shrink all slave clients below the specified index in order.
-        Each client will attempt to shrink as much as it is able before the
-        next client is resized.
-
-        Any amount that was unable to be applied to the clients is returned.
-        """
-        left = amt  # track unused shrink amount
-        # for each client after specified index
-        for idx in range(cidx + 1, len(self.relative_sizes)):
-            # shrink by current total left-over amount
-            left -= left - self.shrink(idx, left)
-        # return unused shrink amount
-        return left
-
-    def shrink_down_shared(self, cidx, amt):
-        """Shrink slave clients
-
-        Will shrink all slave clients below the specified index by an equal
-        share of the provided amount. After applying the shared amount to all
-        affected clients, any amount left over will be applied in a non-equal
-        manner with ``shrink_down``.
-
-        Any amount that was unable to be applied to the clients is returned.
-        """
-        # split shrink amount among number of clients
-        per_amt = amt / (len(self.relative_sizes) - 1 - cidx)
-        left = amt  # track unused shrink amount
-        # for each client after specified index
-        for idx in range(cidx + 1, len(self.relative_sizes)):
-            # shrink by equal amount and track left-over
-            left -= per_amt - self.shrink(idx, per_amt)
-        # apply non-equal shrinkage slave pass
-        # in order to use up any left over shrink amounts
-        left = self.shrink_down(cidx, left)
-        # return whatever could not be applied
-        return left
-
     def _grow_master(self, amt):
         """Will grow the client that is currently in the master pane"""
         self.ratio += amt
         self.ratio = min(self.max_ratio, self.ratio)
-
-    def _grow_solo_slave(self, amt):
-        """Will grow the solitary client in the slave pane"""
-        self.ratio -= amt
-        self.ratio = max(self.min_ratio, self.ratio)
-
-    def _grow_slave(self, amt):
-        """Will grow the focused client in the slave pane"""
-        half_change_size = amt / 2
-        # track unshrinkable amounts
-        left = amt
-        # first slave (top)
-        if self.focused == 1:
-            # only shrink downwards
-            left -= amt - self.shrink_down_shared(0, amt)
-        # last slave (bottom)
-        elif self.focused == len(self.clients) - 1:
-            # only shrink upwards
-            left -= amt - self.shrink_up(len(self.relative_sizes) - 1, amt)
-        # middle slave
-        else:
-            # get size index
-            idx = self.focused - 1
-            # shrink up and down
-            left -= half_change_size - self.shrink_up_shared(
-                idx,
-                half_change_size
-            )
-            left -= half_change_size - self.shrink_down_shared(
-                idx,
-                half_change_size
-            )
-            left -= half_change_size - self.shrink_up_shared(
-                idx,
-                half_change_size
-            )
-            left -= half_change_size - self.shrink_down_shared(
-                idx,
-                half_change_size
-            )
-        # calculate how much shrinkage took place
-        diff = amt - left
-        # grow client by diff amount
-        self.relative_sizes[self.focused - 1] += \
-            self._get_relative_size_from_absolute(diff)
-
-    def cmd_grow(self):
-        """Grow current window
-
-        Will grow the currently focused client reducing the size of those
-        around it. Growing will stop when no other slave clients can reduce
-        their size any further.
-        """
-        if self.focused == 0:
-            self._grow_master(self.change_ratio)
-        elif len(self.clients) == 2:
-            self._grow_solo_slave(self.change_ratio)
-        else:
-            self._grow_slave(self.change_size)
-        self.group.layout_all()
 
     def cmd_grow_master(self):
         """Grow master pane
@@ -606,95 +409,13 @@ class MonadTall(_SimpleLayoutBase):
         self._shrink_master(self.change_ratio)
         self.group.layout_all()
 
-    def grow(self, cidx, amt):
-        "Grow slave client by specified amount"
-        self.relative_sizes[cidx] += self._get_relative_size_from_absolute(amt)
-
-    def grow_up_shared(self, cidx, amt):
-        """Grow higher slave clients
-
-        Will grow all slave clients above the specified index by an equal
-        share of the provided amount.
-        """
-        # split grow amount among number of clients
-        per_amt = amt / cidx
-        for idx in range(0, cidx):
-            self.grow(idx, per_amt)
-
-    def grow_down_shared(self, cidx, amt):
-        """Grow lower slave clients
-
-        Will grow all slave clients below the specified index by an equal
-        share of the provided amount.
-        """
-        # split grow amount among number of clients
-        per_amt = amt / (len(self.relative_sizes) - 1 - cidx)
-        for idx in range(cidx + 1, len(self.relative_sizes)):
-            self.grow(idx, per_amt)
-
     def _shrink_master(self, amt):
         """Will shrink the client that currently in the master pane"""
         self.ratio -= amt
         self.ratio = max(self.min_ratio, self.ratio)
 
-    def _shrink_solo_slave(self, amt):
-        """Will shrink the solitary client in the slave pane"""
-        self.ratio += amt
-        self.ratio = min(self.max_ratio, self.ratio)
-
-    def _shrink_slave(self, amt):
-        """Will shrink the focused client in the slave pane"""
-        # get focused client
-        client = self.clients[self.focused]
-
-        # get default change size
-        change = amt
-
-        # get left-over height after change
-        left = client.height - amt
-        # if change would violate min_slave_size
-        if left < self.min_slave_size:
-            # just reduce to min_slave_size
-            change = client.height - self.min_slave_size
-
-        # calculate half of that change
-        half_change = change / 2
-
-        # first slave (top)
-        if self.focused == 1:
-            # only grow downwards
-            self.grow_down_shared(0, change)
-        # last slave (bottom)
-        elif self.focused == len(self.clients) - 1:
-            # only grow upwards
-            self.grow_up_shared(len(self.relative_sizes) - 1, change)
-        # middle slave
-        else:
-            idx = self.focused - 1
-            # grow up and down
-            self.grow_up_shared(idx, half_change)
-            self.grow_down_shared(idx, half_change)
-        # shrink client by total change
-        self.relative_sizes[self.focused - 1] -= \
-            self._get_relative_size_from_absolute(change)
-
     cmd_next = _SimpleLayoutBase.next
     cmd_previous = _SimpleLayoutBase.previous
-
-    def cmd_shrink(self):
-        """Shrink current window
-
-        Will shrink the currently focused client reducing the size of those
-        around it. Shrinking will stop when the client has reached the minimum
-        size.
-        """
-        if self.focused == 0:
-            self._shrink_master(self.change_ratio)
-        elif len(self.clients) == 2:
-            self._shrink_solo_slave(self.change_ratio)
-        else:
-            self._shrink_slave(self.change_size)
-        self.group.layout_all()
 
     cmd_up = cmd_previous
     cmd_down = cmd_next
@@ -730,22 +451,6 @@ class MonadTall(_SimpleLayoutBase):
         self.group.layout_all()
         self.group.focus(window1)
 
-    def cmd_swap_left(self):
-        """Swap current window with closest window to the left"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients if c.info()['x'] < x]
-        target = self._get_closest(x, y, candidates)
-        self.cmd_swap(win, target)
-
-    def cmd_swap_right(self):
-        """Swap current window with closest window to the right"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients if c.info()['x'] > x]
-        target = self._get_closest(x, y, candidates)
-        self.cmd_swap(win, target)
-
     def cmd_swap_master(self):
         """Swap current window to master pane"""
         win = self.clients.current_client
@@ -757,25 +462,6 @@ class MonadTall(_SimpleLayoutBase):
             target = self.clients[0]
 
         self.cmd_swap(win, target)
-
-    def cmd_left(self):
-        """Focus on the closest window to the left of the current window"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients if c.info()["x"] < x]
-        self.clients.current_client = self._get_closest(x, y, candidates)
-        self.group.focus(self.clients.current_client)
-
-    def cmd_right(self):
-        """Focus on the closest window to the right of the current window"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients if c.info()["x"] > x]
-        self.clients.current_client = self._get_closest(x, y, candidates)
-        self.group.focus(self.clients.current_client)
-
-    cmd_shuffle_left = cmd_swap_left
-    cmd_shuffle_right = cmd_swap_right
 
     def cmd_decrease_nmaster(self):
         """Decrease number of windows in master pane"""
@@ -917,35 +603,6 @@ class MonadWide(MonadTall):
     _hori = 0
     _vert = 1
 
-    def _get_relative_size_from_absolute(self, absolute_size):
-        return absolute_size / self.screen_rect.width
-
-    def _get_absolute_size_from_relative(self, relative_size):
-        return int(relative_size * self.screen_rect.width)
-
-    def _maximize_slave(self):
-        """Toggle the focused slave pane between min and max size."""
-        n = len(self.clients) - 2  # total shrinking clients
-        # total size of collapsed secondaries
-        collapsed_size = self.min_slave_size * n
-        nidx = self.focused - 1  # focused size index
-        # total width of maximized slave
-        maxed_size = self.screen_rect.width - collapsed_size
-        # if maximized or nearly maximized
-        if abs(
-            self._get_absolute_size_from_relative(self.relative_sizes[nidx]) -
-            maxed_size
-        ) < self.change_size:
-            # minimize
-            self._shrink_slave(
-                self._get_absolute_size_from_relative(
-                    self.relative_sizes[nidx]
-                ) - self.min_slave_size
-            )
-        # otherwise maximize
-        else:
-            self._grow_slave(maxed_size)
-
     def _configure_specific(self, client, screen_rect, px, cidx):
         """Specific configuration for xmonad wide."""
         self.screen_rect = screen_rect
@@ -1025,55 +682,3 @@ class MonadWide(MonadTall):
                     self.margin,
                 ],
             )
-
-    def _shrink_slave(self, amt):
-        """Will shrink the focused client in the slave pane"""
-        # get focused client
-        client = self.clients[self.focused]
-
-        # get default change size
-        change = amt
-
-        # get left-over height after change
-        left = client.width - amt
-        # if change would violate min_slave_size
-        if left < self.min_slave_size:
-            # just reduce to min_slave_size
-            change = client.width - self.min_slave_size
-
-        # calculate half of that change
-        half_change = change / 2
-
-        # first slave (top)
-        if self.focused == 1:
-            # only grow downwards
-            self.grow_down_shared(0, change)
-        # last slave (bottom)
-        elif self.focused == len(self.clients) - 1:
-            # only grow upwards
-            self.grow_up_shared(len(self.relative_sizes) - 1, change)
-        # middle slave
-        else:
-            idx = self.focused - 1
-            # grow up and down
-            self.grow_up_shared(idx, half_change)
-            self.grow_down_shared(idx, half_change)
-        # shrink client by total change
-        self.relative_sizes[self.focused - 1] -= \
-            self._get_relative_size_from_absolute(change)
-
-    def cmd_swap_left(self):
-        """Swap current window with closest window to the down"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients.clients if c.info()["y"] > y]
-        target = self._get_closest(x, y, candidates)
-        self.cmd_swap(win, target)
-
-    def cmd_swap_right(self):
-        """Swap current window with closest window to the up"""
-        win = self.clients.current_client
-        x, y = win.x, win.y
-        candidates = [c for c in self.clients if c.info()["y"] < y]
-        target = self._get_closest(x, y, candidates)
-        self.cmd_swap(win, target)
