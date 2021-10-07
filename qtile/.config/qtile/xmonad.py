@@ -643,7 +643,8 @@ class MonadWide(MonadTall):
                 if self.align == self._up:
                     ypos = self.screen_rect.y + pos * height
                 else:
-                    ypos = (self.screen_rect.y + height_slave + height_master) - (pos + 1) * height
+                    ypos = (self.screen_rect.y + height_slave + height_master)
+                    - (pos + 1) * height
 
             # master client
             client.place(
