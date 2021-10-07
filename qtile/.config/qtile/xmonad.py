@@ -235,6 +235,7 @@ class MonadTall(_SimpleLayoutBase):
             self.align = self._left
         if self.orientation == self._hori:
             self.align = self._vert
+        self.master_length = 1
         self.cmd_normalize(redraw)
 
     def cmd_maximize(self):
