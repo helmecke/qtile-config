@@ -233,13 +233,9 @@ class MonadTall(_SimpleLayoutBase):
         return self.clients.remove(client)
 
     def cmd_normalize(self, redraw=True):
-        "Evenly distribute screen-space among slave clients"
-        n = len(self.clients) - 1  # exclude master client, 0
-        # if slave clients exist
-        if n > 0 and self.screen_rect is not None:
-            self.relative_sizes = [1.0 / n] * n
-        # reset master pane ratio
+        "Evenly distribute screen-space between master and slave pane"
         if redraw:
+            self.ratio = self._med_ratio
             self.group.layout_all()
         self.do_normalize = False
 
