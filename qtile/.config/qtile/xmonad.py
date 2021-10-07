@@ -34,8 +34,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math
-
 from libqtile.layout.base import _SimpleLayoutBase
 
 
@@ -190,7 +188,6 @@ class MonadTall(_SimpleLayoutBase):
             self.single_border_width = self.border_width
         if self.single_margin is None:
             self.single_margin = self.margin
-        self.relative_sizes = []
         self.screen_rect = None
 
     @property
@@ -205,17 +202,9 @@ class MonadTall(_SimpleLayoutBase):
     def slave_windows(self):
         return self.clients[self.master_length:]
 
-    def _get_relative_size_from_absolute(self, absolute_size):
-        return absolute_size / self.screen_rect.height
-
-    def _get_absolute_size_from_relative(self, relative_size):
-        return int(relative_size * self.screen_rect.height)
-
     def clone(self, group):
         "Clone layout for other groups"
         c = _SimpleLayoutBase.clone(self, group)
-        c.sizes = []
-        c.relative_sizes = []
         c.screen_rect = group.screen.get_rect() if group.screen else None
         c.ratio = self.ratio
         c.align = self.align
@@ -260,8 +249,7 @@ class MonadTall(_SimpleLayoutBase):
         "Position client based on order and sizes"
         self.screen_rect = screen_rect
 
-        # if no sizes or normalize flag is set, normalize
-        if not self.relative_sizes or self.do_normalize:
+        if self.do_normalize:
             self.cmd_normalize(False)
 
         # if client not in this layout
@@ -432,14 +420,6 @@ class MonadTall(_SimpleLayoutBase):
         """Flip the layout horizontally"""
         self.align = self._left if self.align == self._right else self._right
         self.group.layout_all()
-
-    def _get_closest(self, x, y, clients):
-        """Get closest window to a point x,y"""
-        target = min(
-            clients,
-            key=lambda c: math.hypot(c.info()["x"] - x, c.info()["y"] - y)
-        )
-        return target
 
     def cmd_swap(self, window1, window2):
         """Swap two windows"""
