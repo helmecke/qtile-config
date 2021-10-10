@@ -473,6 +473,7 @@ floating_layout = layout.Floating(
         Match(wm_class="ssh-askpass"),  # ssh-askpass
         Match(wm_class="arandr"),
         Match(wm_class="Cisco AnyConnect Secure Mobility Client"),
+        Match(wm_class="Galculator"),
         Match(title="branchdialog"),  # gitk
         Match(title="pinentry"),  # GPG key password entry
     ],
