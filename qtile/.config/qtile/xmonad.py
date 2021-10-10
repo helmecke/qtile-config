@@ -168,7 +168,7 @@ class MonadTall(_SimpleLayoutBase):
             "(one of ``MonadTall._left`` or ``MonadTall._right``)"),
         ("change_ratio", .05, "Resize ratio"),
         ("change_size", 20, "Resize change in pixels"),
-        ("new_client_position", "top",
+        ("new_client_position", "before_current",
             "Place new windows: "
             " after_current - after the active window."
             " before_current - before the active window,"
