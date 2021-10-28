@@ -162,12 +162,9 @@ class MonadTall(_SimpleLayoutBase):
         ("max_ratio", .75,
             "The percent of the screen-space the master pane should occupy "
             "at maximum."),
-        ("min_slave_size", 85,
-            "minimum size in pixel for a slave pane window "),
         ("align", _left, "Which side master plane will be placed "
             "(one of ``MonadTall._left`` or ``MonadTall._right``)"),
         ("change_ratio", .05, "Resize ratio"),
-        ("change_size", 20, "Resize change in pixels"),
         ("new_client_position", "before_current",
             "Place new windows: "
             " after_current - after the active window."
