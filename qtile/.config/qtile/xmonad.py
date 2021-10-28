@@ -294,6 +294,13 @@ class MonadTall(_SimpleLayoutBase):
         width_master = int(self.screen_rect.width * self.ratio)
         width_slave = self.screen_rect.width - width_master
 
+        if len(self.master_windows) == 0:
+            width_master = 0
+            width_slave = self.screen_rect.width
+        if len(self.slave_windows) == 0:
+            width_master = self.screen_rect.width
+            width_slave = 0
+
         # calculate client's x offset
         if self.align == self._left:  # left or up orientation
             if client in self.master_windows:
@@ -445,14 +452,14 @@ class MonadTall(_SimpleLayoutBase):
         """Decrease number of windows in master pane"""
         self.master_length -= 1
         if self.master_length <= 0:
-            self.master_length = 1
+            self.master_length = 0
         self.group.layout_all()
 
     def cmd_increase_nmaster(self):
         """Increase number of windows in master pane"""
         self.master_length += 1
         if self.master_length >= len(self.clients) - 1:
-            self.master_length = len(self.clients) - 1
+            self.master_length = len(self.clients)
         self.group.layout_all()
 
     def cmd_master(self):
@@ -588,6 +595,13 @@ class MonadWide(MonadTall):
         # calculate master/slave column widths
         height_master = int(self.screen_rect.height * self.ratio)
         height_slave = self.screen_rect.height - height_master
+
+        if len(self.master_windows) == 0:
+            height_master = 0
+            height_slave = self.screen_rect.height
+        if len(self.slave_windows) == 0:
+            height_master = self.screen_rect.height
+            height_slave = 0
 
         # calculate client's x offset
         if self.align == self._up:  # up orientation
