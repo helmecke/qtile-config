@@ -349,9 +349,10 @@ class MonadTall(_SimpleLayoutBase):
             else:
                 height = self.screen_rect.height
                 width = width_master // self.master_length
+                overflow = width_master % self.master_length
                 ypos = self.screen_rect.y
                 if self.align == self._left:
-                    xpos = self.screen_rect.x + pos * width
+                    xpos = self.screen_rect.x + pos * width + overflow
                 else:
                     xpos = self.screen_rect.x + width_slave + pos * width
 
@@ -653,9 +654,10 @@ class MonadWide(MonadTall):
             else:
                 width = self.screen_rect.width
                 height = height_master // self.master_length
+                overflow = height_master % self.master_length
                 xpos = self.screen_rect.x
                 if self.align == self._up:
-                    ypos = self.screen_rect.y + pos * height
+                    ypos = self.screen_rect.y + pos * height + overflow
                 else:
                     ypos = self.screen_rect.y + height_slave + pos * height
 
