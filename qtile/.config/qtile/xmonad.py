@@ -235,7 +235,7 @@ class MonadTall(_SimpleLayoutBase):
         if self.align == self._right:
             self.align = self._left
         if self.orientation == self._hori:
-            self.align = self._vert
+            self.orientation = self._vert
         self.master_length = 1
         self.cmd_normalize(redraw)
 
@@ -353,7 +353,7 @@ class MonadTall(_SimpleLayoutBase):
                 if self.align == self._left:
                     xpos = self.screen_rect.x + pos * width
                 else:
-                    xpos = self.screen_rect.width - (pos + 1) * width
+                    xpos = self.screen_rect.x + width_slave + pos * width
 
             # master client
             client.place(
@@ -657,8 +657,7 @@ class MonadWide(MonadTall):
                 if self.align == self._up:
                     ypos = self.screen_rect.y + pos * height
                 else:
-                    ypos = (self.screen_rect.y + height_slave + height_master)
-                    - (pos + 1) * height
+                    ypos = self.screen_rect.y + height_slave + pos * height
 
             # master client
             client.place(
