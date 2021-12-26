@@ -153,29 +153,49 @@ class MonadTall(_SimpleLayoutBase):
         ("single_border_width", None, "Border width for single window"),
         ("single_margin", None, "Margin size for single window"),
         ("margin", 0, "Margin of the layout"),
-        ("ratio", .5,
-            "The percent of the screen-space the master pane should occupy "
-            "by default."),
-        ("min_ratio", .25,
-            "The percent of the screen-space the master pane should occupy "
-            "at minimum."),
-        ("max_ratio", .75,
-            "The percent of the screen-space the master pane should occupy "
-            "at maximum."),
-        ("align", _left, "Which side master plane will be placed "
-            "(one of ``MonadTall._left`` or ``MonadTall._right``)"),
-        ("change_ratio", .05, "Resize ratio"),
-        ("new_client_position", "before_current",
+        (
+            "ratio",
+            0.5,
+            "The percent of the screen-space the master pane should occupy by default.",
+        ),
+        (
+            "min_ratio",
+            0.25,
+            "The percent of the screen-space the master pane should occupy at minimum.",
+        ),
+        (
+            "max_ratio",
+            0.75,
+            "The percent of the screen-space the master pane should occupy at maximum.",
+        ),
+        (
+            "align",
+            _left,
+            "Which side master plane will be placed (one of ``MonadTall._left`` or "
+            "``MonadTall._right``)",
+        ),
+        ("change_ratio", 0.05, "Resize ratio"),
+        (
+            "new_client_position",
+            "before_current",
             "Place new windows: "
             " after_current - after the active window."
             " before_current - before the active window,"
             " top - at the top of the stack,"
-            " bottom - at the bottom of the stack,"),
-        ("master_length", 1,
-            "Amount of windows displayed in the master stack. Surplus windows "
-            "will be moved to the slave stack."),
-        ("orientation", _vert, "Orientation in which master windows will be "
-            "placed (one of ``MonadTall._vert`` or ``MonadTall._hori``)"),
+            " bottom - at the bottom of the stack,",
+        ),
+        (
+            "master_length",
+            1,
+            "Amount of windows displayed in the master stack. Surplus windows will be moved to "
+            "the slave stack.",
+        ),
+        (
+            "orientation",
+            _vert,
+            "Orientation in which master windows will be "
+            "placed (one of ``MonadTall._vert`` or ``MonadTall._hori``)",
+        ),
         ("maximized", False, "Start maximized"),
     ]
 
@@ -194,11 +214,11 @@ class MonadTall(_SimpleLayoutBase):
 
     @property
     def master_windows(self):
-        return self.clients[:self.master_length]
+        return self.clients[: self.master_length]
 
     @property
     def slave_windows(self):
-        return self.clients[self.master_length:]
+        return self.clients[self.master_length :]
 
     def clone(self, group):
         "Clone layout for other groups"
@@ -321,8 +341,7 @@ class MonadTall(_SimpleLayoutBase):
             width = width_slave - 2 * self.border_width
             # ypos is the sum of all clients above it
             height = self.screen_rect.height // len(self.slave_windows)
-            ypos = self.screen_rect.y + \
-                self.clients[self.master_length:].index(client) * height
+            ypos = self.screen_rect.y + self.clients[self.master_length :].index(client) * height
             # fix double margin
             if cidx > 1:
                 ypos -= self.margin
@@ -363,18 +382,20 @@ class MonadTall(_SimpleLayoutBase):
                 px,
                 margin=[
                     self.margin,
-                    2*self.border_width,
-                    self.margin + 2*self.border_width,
-                    self.margin
+                    2 * self.border_width,
+                    self.margin + 2 * self.border_width,
+                    self.margin,
                 ],
             )
 
     def info(self):
         d = _SimpleLayoutBase.info(self)
-        d.update(dict(
-            master=[c.name for c in self.master_windows],
-            slave=[c.name for c in self.slave_windows],
-        ))
+        d.update(
+            dict(
+                master=[c.name for c in self.master_windows],
+                slave=[c.name for c in self.slave_windows],
+            )
+        )
         return d
 
     def _grow_master(self, amt):
@@ -623,8 +644,7 @@ class MonadWide(MonadTall):
             height = height_slave - 2 * self.border_width
             # xpos is the sum of all clients left of it
             width = self.screen_rect.width // len(self.slave_windows)
-            xpos = self.screen_rect.x + \
-                self.clients[self.master_length:].index(client) * width
+            xpos = self.screen_rect.x + self.clients[self.master_length :].index(client) * width
             # get width from precalculated width list
             width = self.screen_rect.width // len(self.slave_windows)
 
@@ -668,8 +688,8 @@ class MonadWide(MonadTall):
                 px,
                 margin=[
                     self.margin,
-                    self.margin + 2*self.border_width,
-                    2*self.border_width,
+                    self.margin + 2 * self.border_width,
+                    2 * self.border_width,
                     self.margin,
                 ],
             )

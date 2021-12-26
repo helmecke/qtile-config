@@ -1,55 +1,29 @@
-# Copyright (c) 2010 Aldo Cortesi
-# Copyright (c) 2010, 2014 dequis
-# Copyright (c) 2012 Randall Ma
-# Copyright (c) 2012-2014 Tycho Andersen
-# Copyright (c) 2012 Craig Barnes
-# Copyright (c) 2013 horsik
-# Copyright (c) 2013 Tao Sauvage
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+"""Qtile config."""
 
 import os
 import subprocess
-import psutil
-from typing import List  # noqa: F401
 
-from libqtile import bar, layout, widget, hook, qtile
-from libqtile.widget.battery import Battery, BatteryState
+import xmonad
+from libqtile import bar, hook, layout, qtile, widget
 from libqtile.config import (
     Click,
     Drag,
+    DropDown,
     Group,
     Key,
     KeyChord,
     Match,
-    Screen,
-    DropDown,
     ScratchPad,
+    Screen,
 )
-import xmonad
 from libqtile.lazy import lazy
-
+from libqtile.widget.battery import Battery, BatteryState
 
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.environ["HOME"] + "/.config")
 
 
 def get_group(group_name):
+    """Get group by name."""
     for group in groups:
         if group.name == group_name:
             return group
@@ -70,10 +44,7 @@ def toscreen(qtile, group_name):
                 return qtile.current_screen.set_group(qtile.groups[i])
             elif qtile.current_screen.index == screen_affinity:
                 return qtile.current_screen.set_group(qtile.groups[i])
-            elif (
-                qtile.current_screen.index != screen_affinity
-                and screen_affinity is not None
-            ):
+            elif qtile.current_screen.index != screen_affinity and screen_affinity is not None:
                 qtile.cmd_to_screen(screen_affinity)
                 return qtile.current_screen.set_group(qtile.groups[i])
             else:
@@ -131,7 +102,6 @@ keys = [
     Key([mod], "period", lazy.layout.increase_nmaster()),
     Key([mod], "space", lazy.layout.master()),
     Key([mod, shift], "space", lazy.layout.swap_master()),
-
     Key([mod, ctrl], "space", lazy.window.toggle_floating()),
     Key([mod, ctrl], "n", lazy.window.toggle_minimize()),
     Key([mod, ctrl], "f", lazy.window.toggle_fullscreen()),
@@ -330,12 +300,12 @@ extension_defaults = widget_defaults.copy()
 
 
 class MyBattery(Battery):
+    """My custom battery widget."""
+
     def build_string(self, status):
+        """Build string for output."""
         if self.layout is not None:
-            if (
-                status.state == BatteryState.DISCHARGING
-                and status.percent < self.low_percentage
-            ):
+            if status.state == BatteryState.DISCHARGING and status.percent < self.low_percentage:
                 self.layout.colour = self.low_foreground
             else:
                 self.layout.colour = self.foreground
@@ -355,11 +325,13 @@ class MyBattery(Battery):
         return self.format.format(char=char, percent=status.percent)
 
     def restore(self):
+        """Restore."""
         self.format = "{char}"
         self.font = widget_defaults.font
         self.timer_setup()
 
     def button_press(self, x, y, button):
+        """Button press."""
         self.format = "{percent:2.0%}"
         self.font = widget_defaults.font
         self.timer_setup()
@@ -453,9 +425,7 @@ mouse = [
         lazy.window.set_position_floating(),
         start=lazy.window.get_position(),
     ),
-    Drag(
-        [mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()
-    ),
+    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
 ]
 
@@ -499,6 +469,7 @@ wmname = "LG3D"
 
 @hook.subscribe.startup_once
 def autostart():
+    """Autostart programs."""
     processes = [["dunst"], ["sh -c './.fehbg'"], ["flameshot"]]
 
     for p in processes:
@@ -507,27 +478,6 @@ def autostart():
 
 @hook.subscribe.screen_change
 def set_screens(event):
+    """Set screens."""
     subprocess.run(["autorandr", "--change"])
     qtile.restart()
-
-
-@hook.subscribe.client_new
-def _swallow(window):
-    pid = window.window.get_net_wm_pid()
-    ppid = psutil.Process(pid).ppid()
-    cpids = {c.window.get_net_wm_pid(): wid for wid, c in window.qtile.windows_map.items()}
-    for i in range(5):
-        if not ppid:
-            return
-        if ppid in cpids:
-            parent = window.qtile.windows_map.get(cpids[ppid])
-            parent.minimized = True
-            window.parent = parent
-            return
-        ppid = psutil.Process(ppid).ppid()
-
-
-@hook.subscribe.client_killed
-def _unswallow(window):
-    if hasattr(window, 'parent'):
-        window.parent.minimized = False
