@@ -17,6 +17,7 @@ from libqtile.config import (
     Screen,
 )
 from libqtile.lazy import lazy
+from libqtile.log_utils import logger
 from libqtile.widget.battery import Battery, BatteryState
 
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.environ["HOME"] + "/.config")
@@ -59,6 +60,47 @@ def toscreen(qtile, group_name):
     #         return qtile.current_screen.set_group(qtile.groups[i])
 
 
+def my_addgroup(qtile, prompt: str = "group", widget: str = "prompt") -> None:
+    def f(group):
+        if group:
+            try:
+                qtile.groups_map[group].cmd_toscreen()
+            except KeyError:
+                qtile.cmd_addgroup(group)
+                qtile.groups_map[group].cmd_toscreen()
+
+    mb = qtile.widgets_map.get(widget)
+    if not mb:
+        logger.error("No widget named '{0:s}' present.".format(widget))
+        return
+
+    mb.start_input(prompt, f, "group", strict_completer=True)
+
+
+def my_delgroup(qtile) -> None:
+    qtile.cmd_delgroup(qtile.current_group.name)
+
+
+def my_togroup(qtile, prompt: str = "group", widget: str = "prompt") -> None:
+    if not qtile.current_window:
+        logger.warning("No window to move")
+        return
+
+    def f(group):
+        if group in qtile.groups:
+            qtile.current_window.togroup(group, switch_group=True)
+        else:
+            qtile.add_group(group)
+            qtile.current_window.togroup(group, switch_group=True)
+
+    mb = qtile.widgets_map.get(widget)
+    if not mb:
+        logger.error("No widget named '{0:s}' present.".format(widget))
+        return
+
+    mb.start_input(prompt, f, "group", strict_completer=True)
+
+
 mod = "mod4"
 alt = "mod1"
 shift = "shift"
@@ -87,6 +129,16 @@ colors = {
 }
 
 keys = [
+    KeyChord(
+        [mod],
+        "g",
+        [
+            Key([mod], "c", lazy.function(my_addgroup)),
+            Key([mod, shift], "d", lazy.function(my_delgroup)),
+            Key([mod], "g", lazy.switchgroup()),
+            Key([mod], "w", lazy.function(my_togroup)),
+        ],
+    ),
     Key([mod], "j", lazy.layout.down()),
     Key([mod], "k", lazy.layout.up()),
     Key([mod, shift], "j", lazy.layout.shuffle_down()),
@@ -164,7 +216,7 @@ keys = [
     ),
 ]
 
-groups = [Group(i) for i in "123456789"]
+groups = [Group(i) for i in "12345"]
 
 for i in groups:
     keys.extend(
