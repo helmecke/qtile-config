@@ -136,6 +136,7 @@ keys = [
             Key([mod], "c", lazy.function(my_addgroup)),
             Key([mod, shift], "d", lazy.function(my_delgroup)),
             Key([mod], "g", lazy.switchgroup()),
+            Key([mod], "r", lazy.labelgroup()),
             Key([mod], "w", lazy.function(my_togroup)),
         ],
     ),
