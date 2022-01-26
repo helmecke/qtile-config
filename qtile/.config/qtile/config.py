@@ -258,7 +258,7 @@ groups.extend(
             label=" ",
             persist=False,
             init=False,
-            matches=[Match(wm_class=["slack"])],
+            matches=[Match(wm_class=["slack", "Microsoft Teams - Preview"])],
             screen_affinity=1,
         ),
         Group(
