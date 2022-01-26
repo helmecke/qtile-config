@@ -345,6 +345,7 @@ widget_defaults = dict(
     padding=3,
     foreground=colors["white"],
 )
+
 extension_defaults = widget_defaults.copy()
 
 
@@ -396,43 +397,44 @@ battery = MyBattery(
     notify_below=12,
 )
 
-widgets = [
-    widget.CurrentLayoutIcon(scale=0.8),
-    widget.GroupBox(
-        highlight_method="block",
-        rounded=False,
-        spacing=0,
-        this_current_screen_border=colors["blue"],
-        other_screen_border=colors["dark_yellow"],
-    ),
-    widget.Prompt(),
-    widget.WindowName(),
-    widget.Chord(
-        chords_colors={
-            "launch": (colors["red"], colors["white"]),
-        },
-        name_transform=lambda name: name.upper(),
-    ),
-    widget.PulseVolume(fmt=" {}", emoji=True, volume_app="pavucontrol"),
-    widget.PulseVolume(volume_app="pavucontrol"),
-    widget.Spacer(length=2),
-    widget.Clock(format=" %H:%M  %d.%m.%Y"),
-]
-
-primary_widgets = widgets
-primary_widgets.insert(-2, widget.Systray())
-
-if os.path.isfile("/sys/class/power_supply/BAT0"):
-    widgets.append(battery)
-
-
 screens = [
     Screen(
         wallpaper=XDG_CONFIG_HOME + "/qtile/onedark.png",
         wallpaper_mode="fill",
         top=bar.Bar(
-            primary_widgets,
-            24,
+            [
+                widget.CurrentLayoutIcon(scale=0.8),
+                widget.GroupBox(
+                    highlight_method="block",
+                    rounded=False,
+                    this_current_screen_border=colors["blue"],
+                    other_screen_border=colors["dark_yellow"],
+                    hide_unused=True,
+                ),
+                widget.Chord(
+                    chords_colors={
+                        "launch": (colors["red"], colors["white"]),
+                    },
+                    name_transform=lambda name: name.upper(),
+                ),
+                widget.Prompt(),
+                widget.TaskList(
+                    highlight_method="block",
+                    border=colors["special_grey"],
+                    foreground=colors["white"],
+                    icon_size=0,
+                    margin=0,
+                    title_width_method="uniform",
+                    max_title_width=350,
+                    txt_minimized="絛 ",
+                    txt_maximized="类 ",
+                    txt_floating="缾 ",
+                ),
+                widget.Systray(),
+                widget.Spacer(length=3),
+                widget.Clock(format=" %H:%M  %d.%m.%Y"),
+            ],
+            26,
             background=colors["black"],
             margin=2,
         ),
@@ -440,29 +442,40 @@ screens = [
     Screen(
         top=bar.Bar(
             [
-                widget.CurrentLayout(),
-                # widget.CurrentLayoutIcon(scale=0.8),
+                widget.CurrentLayoutIcon(scale=0.8),
                 widget.GroupBox(
                     highlight_method="block",
                     rounded=False,
-                    spacing=0,
                     this_current_screen_border=colors["blue"],
                     other_screen_border=colors["dark_yellow"],
+                    hide_unused=True,
                 ),
-                widget.Prompt(),
-                widget.WindowName(),
                 widget.Chord(
                     chords_colors={
                         "launch": (colors["red"], colors["white"]),
                     },
                     name_transform=lambda name: name.upper(),
                 ),
+                widget.Prompt(),
+                widget.TaskList(
+                    highlight_method="block",
+                    border=colors["special_grey"],
+                    foreground=colors["white"],
+                    icon_size=0,
+                    margin=0,
+                    title_width_method="uniform",
+                    max_title_width=350,
+                    txt_minimized="絛 ",
+                    txt_maximized="类 ",
+                    txt_floating="缾 ",
+                ),
+                widget.Spacer(length=3),
                 widget.Clock(format=" %H:%M  %d.%m.%Y"),
             ],
-            24,
+            26,
             background=colors["black"],
             margin=2,
-        )
+        ),
     ),
 ]
 
