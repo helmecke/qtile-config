@@ -144,6 +144,8 @@ keys = [
     Key([mod], "k", lazy.layout.up()),
     Key([mod, shift], "j", lazy.layout.shuffle_down()),
     Key([mod, shift], "k", lazy.layout.shuffle_up()),
+    Key([mod, ctrl], "j", lazy.group.next_window()),
+    Key([mod, ctrl], "k", lazy.group.prev_window()),
     Key([mod], "h", lazy.layout.shrink_master()),
     Key([mod], "l", lazy.layout.grow_master()),
     Key([mod], "n", lazy.layout.normalize()),
