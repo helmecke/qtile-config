@@ -326,6 +326,48 @@ keys.extend(
                 Key([mod], "s", lazy.group["scratchpad"].dropdown_toggle("spotify")),
             ],
         ),
+        KeyChord(
+            [mod],
+            "z",
+            [
+                Key(
+                    [mod],
+                    "u",
+                    lazy.spawn(
+                        [
+                            "sh",
+                            "-c",
+                            "gopass ls --flat | rofi -dmenu | xargs --no-run-if-empty -I{} -r "
+                            "qtile cmd-obj -o cmd -f spawn -a 'gopass show --clip {} username'",
+                        ]
+                    ),
+                ),
+                Key(
+                    [mod],
+                    "p",
+                    lazy.spawn(
+                        [
+                            "sh",
+                            "-c",
+                            "gopass ls --flat | rofi -dmenu | xargs --no-run-if-empty -I{} -r "
+                            "qtile cmd-obj -o cmd -f spawn -a 'gopass show --clip {}'",
+                        ]
+                    ),
+                ),
+                Key(
+                    [mod],
+                    "o",
+                    lazy.spawn(
+                        [
+                            "sh",
+                            "-c",
+                            "gopass ls --flat | rofi -dmenu | xargs --no-run-if-empty -I{} -r "
+                            "qtile cmd-obj -o cmd -f spawn -a 'gopass totp --clip {}'",
+                        ]
+                    ),
+                ),
+            ],
+        ),
     ]
 )
 
