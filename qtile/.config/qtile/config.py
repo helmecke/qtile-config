@@ -19,6 +19,7 @@ from libqtile.config import (
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from libqtile.widget.battery import Battery, BatteryState
+from monitors import get_monitors
 
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.environ["HOME"] + "/.config")
 
@@ -99,6 +100,13 @@ def my_togroup(qtile, prompt: str = "group", widget: str = "prompt") -> None:
         return
 
     mb.start_input(prompt, f, "group", strict_completer=True)
+
+
+def my_tasklist_parse(text):
+    if text.startswith("qute"):
+        text = text.split("]", 1)[0] + "]"
+
+    return text
 
 
 mod = "mod4"
@@ -440,87 +448,66 @@ battery = MyBattery(
     notify_below=12,
 )
 
-screens = [
-    Screen(
-        wallpaper=XDG_CONFIG_HOME + "/qtile/onedark.png",
-        wallpaper_mode="fill",
-        top=bar.Bar(
-            [
-                widget.CurrentLayoutIcon(scale=0.8),
-                widget.GroupBox(
-                    highlight_method="block",
-                    rounded=False,
-                    this_current_screen_border=colors["blue"],
-                    other_screen_border=colors["dark_yellow"],
-                    hide_unused=True,
-                ),
-                widget.Chord(
-                    chords_colors={
-                        "launch": (colors["red"], colors["white"]),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.Prompt(),
-                widget.TaskList(
-                    highlight_method="block",
-                    border=colors["special_grey"],
-                    foreground=colors["white"],
-                    icon_size=0,
-                    margin=0,
-                    title_width_method="uniform",
-                    max_title_width=350,
-                    txt_minimized="絛 ",
-                    txt_maximized="类 ",
-                    txt_floating="缾 ",
-                ),
-                widget.Systray(),
-                widget.Spacer(length=3),
-                widget.Clock(format=" %H:%M  %d.%m.%Y"),
-            ],
-            26,
-            background=colors["black"],
-            margin=2,
+
+def get_widgets():
+    return [
+        widget.CurrentLayoutIcon(scale=0.8),
+        widget.GroupBox(
+            highlight_method="block",
+            rounded=False,
+            this_current_screen_border=colors["blue"],
+            other_screen_border=colors["dark_yellow"],
+            hide_unused=True,
         ),
-    ),
-    Screen(
-        top=bar.Bar(
-            [
-                widget.CurrentLayoutIcon(scale=0.8),
-                widget.GroupBox(
-                    highlight_method="block",
-                    rounded=False,
-                    this_current_screen_border=colors["blue"],
-                    other_screen_border=colors["dark_yellow"],
-                    hide_unused=True,
-                ),
-                widget.Chord(
-                    chords_colors={
-                        "launch": (colors["red"], colors["white"]),
-                    },
-                    name_transform=lambda name: name.upper(),
-                ),
-                widget.Prompt(),
-                widget.TaskList(
-                    highlight_method="block",
-                    border=colors["special_grey"],
-                    foreground=colors["white"],
-                    icon_size=0,
-                    margin=0,
-                    title_width_method="uniform",
-                    max_title_width=350,
-                    txt_minimized="絛 ",
-                    txt_maximized="类 ",
-                    txt_floating="缾 ",
-                ),
-                widget.Spacer(length=3),
-                widget.Clock(format=" %H:%M  %d.%m.%Y"),
-            ],
-            26,
-            background=colors["black"],
-            margin=2,
+        widget.Chord(
+            chords_colors={
+                "launch": (colors["red"], colors["white"]),
+            },
+            name_transform=lambda name: name.upper(),
         ),
-    ),
-]
+        widget.Prompt(),
+        widget.Spacer(length=10),
+        widget.TaskList(
+            highlight_method="block",
+            border=colors["special_grey"],
+            unfocused_border="#353940",
+            foreground=colors["white"],
+            icon_size=0,
+            margin=0,
+            title_width_method="uniform",
+            # max_title_width=350,
+            txt_minimized="絛 ",
+            txt_maximized="类 ",
+            txt_floating="缾 ",
+            parse_text=my_tasklist_parse,
+        ),
+        widget.Spacer(length=13),
+        widget.Spacer(length=5),
+        widget.Clock(format=" %H:%M  %d.%m.%Y"),
+    ]
+
+
+screens = []
+monitors = get_monitors()
+if monitors is not None:
+    for monitor in monitors:
+        widgets = get_widgets()
+
+        if monitor["primary"]:
+            widgets.insert(-2, widget.Systray())
+        if monitor["name"] == "eDP1":
+            widgets.insert(-2, battery)
+
+        screens.append(
+            Screen(
+                bar.Bar(
+                    widgets,
+                    26,
+                    background=colors["black"],
+                    margin=2,
+                )
+            )
+        )
 
 # Drag floating layouts.
 mouse = [
@@ -555,7 +542,7 @@ floating_layout = layout.Floating(
 @hook.subscribe.startup_once
 def autostart():
     """Autostart programs."""
-    processes = [["dunst"], ["sh -c './.fehbg'"], ["flameshot"]]
+    processes = [["dunst"]]
 
     for p in processes:
         subprocess.Popen(p)
