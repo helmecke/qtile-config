@@ -150,6 +150,7 @@ keys = [
     Key([mod], "l", lazy.layout.grow_master()),
     Key([mod], "n", lazy.layout.normalize()),
     Key([mod, shift], "n", lazy.layout.reset()),
+    Key([mod, ctrl], "m", lazy.window.toggle_maximize()),
     Key([mod], "m", lazy.layout.maximize()),
     Key([mod], "y", lazy.layout.flip()),
     Key([mod, shift], "y", lazy.layout.flip_master()),
