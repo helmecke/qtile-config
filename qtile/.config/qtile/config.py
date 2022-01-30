@@ -107,7 +107,7 @@ shift = "shift"
 ctrl = "control"
 
 terminal = "kitty"
-editor = terminal + " --title nvim zsh -c nvim"
+editor = terminal + " zsh -c nvim"
 
 colors = {
     "red": "#E06C75",
