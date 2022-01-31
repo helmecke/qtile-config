@@ -505,7 +505,9 @@ if monitors is not None:
                     26,
                     background=colors["black"],
                     margin=2,
-                )
+                ),
+                wallpaper=XDG_CONFIG_HOME + "/qtile/onedark.png",
+                wallpaper_mode="fill",
             )
         )
 
