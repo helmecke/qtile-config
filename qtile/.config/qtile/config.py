@@ -544,7 +544,7 @@ floating_layout = layout.Floating(
 @hook.subscribe.startup_once
 def autostart():
     """Autostart programs."""
-    processes = [["dunst"]]
+    processes = [["dunst"], ["autorandr", "--change"]]
 
     for p in processes:
         subprocess.Popen(p)
