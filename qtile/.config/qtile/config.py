@@ -3,7 +3,6 @@
 import os
 import subprocess
 
-import xmonad
 from libqtile import bar, hook, layout, qtile, widget
 from libqtile.config import (
     Click,
@@ -19,7 +18,9 @@ from libqtile.config import (
 from libqtile.lazy import lazy
 from libqtile.log_utils import logger
 from libqtile.widget.battery import Battery, BatteryState
+
 from monitors import get_monitors
+from xmonad import MonadTall, MonadWide
 
 XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", os.environ["HOME"] + "/.config")
 
@@ -386,8 +387,8 @@ layout_defaults = dict(
 )
 
 layouts = [
-    xmonad.MonadTall(**layout_defaults),
-    xmonad.MonadWide(**layout_defaults),
+    MonadTall(**layout_defaults),
+    MonadWide(**layout_defaults),
 ]
 
 widget_defaults = dict(
