@@ -477,7 +477,7 @@ class MonadTall(_SimpleLayoutBase):
     def cmd_increase_nmaster(self):
         """Increase number of windows in master pane"""
         self.master_length += 1
-        if self.master_length >= len(self.clients) - 1:
+        if self.master_length >= len(self.clients):
             self.master_length = len(self.clients)
         self.group.layout_all()
 
