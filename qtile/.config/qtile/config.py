@@ -110,6 +110,18 @@ def my_tasklist_parse(text):
     return text
 
 
+def group_or_app(qtile, group, app):
+    """Go to specified group if it exists. Otherwise, run the specified app.
+    When used in conjunction with dgroups to auto-assign apps to specific
+    groups, this can be used as a way to go to an app if it is already
+    running."""
+
+    try:
+        qtile.groups_map[group].cmd_toscreen()
+    except KeyError:
+        qtile.cmd_spawn(app)
+
+
 mod = "mod4"
 alt = "mod1"
 shift = "shift"
@@ -317,15 +329,21 @@ groups.append(
 keys.extend(
     [
         # Key([mod], "s", lazy.group["chat"].toscreen()),
-        Key([mod], "s", lazy.function(toscreen, "chat")),
+        Key([mod], "s", lazy.function(group_or_app, "chat", "slack")),
         Key([mod, shift], "s", lazy.window.togroup("chat", switch_group=True)),
         # Key([mod], "w", lazy.group["www"].toscreen()),
-        Key([mod], "w", lazy.function(toscreen, "www")),
+        Key([mod], "w", lazy.function(group_or_app, "www", "qutebrowser")),
         Key([mod, shift], "w", lazy.window.togroup("www", switch_group=True)),
         # Key([mod], "e", lazy.group["edit"].toscreen()),
-        Key([mod], "e", lazy.function(toscreen, "edit")),
+        Key(
+            [mod], "e", lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -c nvim")
+        ),
         Key([mod, shift], "e", lazy.window.togroup("edit", switch_group=True)),
-        Key([mod], "f", lazy.function(toscreen, "file")),
+        Key(
+            [mod],
+            "f",
+            lazy.function(group_or_app, "file", terminal + " --class vifm zsh -c vifm"),
+        ),
         Key([mod, shift], "f", lazy.window.togroup("file", switch_group=True)),
         Key([mod], "grave", lazy.group["scratchpad"].dropdown_toggle("term")),
         KeyChord(
