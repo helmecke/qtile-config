@@ -34,31 +34,17 @@ def get_group(group_name):
 
 def toscreen(qtile, group_name):
     """Sticky screen focus group."""
-    for i, group in enumerate(qtile.groups):
-        if group_name == group.name:
-            screen_affinity = get_group(group_name).screen_affinity
-            if (
-                qtile.current_screen == group.screen
-                or qtile.current_screen.index == screen_affinity
-            ):
-                return qtile.current_screen.set_group(qtile.groups[i])
-            elif group.screen is None and screen_affinity is None:
-                return qtile.current_screen.set_group(qtile.groups[i])
-            elif qtile.current_screen.index == screen_affinity:
-                return qtile.current_screen.set_group(qtile.groups[i])
-            elif qtile.current_screen.index != screen_affinity and screen_affinity is not None:
-                qtile.cmd_to_screen(screen_affinity)
-                return qtile.current_screen.set_group(qtile.groups[i])
-            else:
-                qtile.cmd_to_screen(group.screen.index)
-                return qtile.current_screen.set_group(qtile.groups[i])
-                # qtile.cmd_spawn("notify-send '%s'" % "test")
+    group = qtile.groups_map.get(group_name)
 
-    # if group_name == qtile.current_screen.group.name:
-    #     return qtile.current_screen.set_group(qtile.current_screen.previous_group)
-    # for i, group in enumerate(qtile.groups):
-    #     if group_name == group.name:
-    #         return qtile.current_screen.set_group(qtile.groups[i])
+    if group is None:
+        raise KeyError("Group does not exist", group_name)
+
+    screen_affinity = get_group(group_name).screen_affinity
+
+    if qtile.current_screen.index != screen_affinity and screen_affinity is not None:
+        qtile.cmd_to_screen(screen_affinity)
+
+    return qtile.current_screen.set_group(group)
 
 
 def my_tasklist_parse(text):
@@ -68,14 +54,14 @@ def my_tasklist_parse(text):
     return text
 
 
-def group_or_app(qtile, group, app):
+def group_or_app(qtile, group_name, app):
     """Go to specified group if it exists. Otherwise, run the specified app.
     When used in conjunction with dgroups to auto-assign apps to specific
     groups, this can be used as a way to go to an app if it is already
     running."""
 
     try:
-        qtile.groups_map[group].cmd_toscreen()
+        toscreen(qtile, group_name)
     except KeyError:
         qtile.cmd_spawn(app)
 
