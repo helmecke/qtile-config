@@ -16,7 +16,6 @@ from libqtile.config import (
     Screen,
 )
 from libqtile.lazy import lazy
-from libqtile.log_utils import logger
 from libqtile.widget.battery import Battery, BatteryState
 
 from monitors import get_monitors
