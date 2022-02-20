@@ -72,7 +72,7 @@ shift = "shift"
 ctrl = "control"
 
 terminal = "kitty"
-editor = terminal + " zsh -c nvim"
+editor = terminal + " zsh -i -c nvim"
 
 colors = {
     "red": "#E06C75",
@@ -277,13 +277,15 @@ keys.extend(
         Key([mod, shift], "w", lazy.window.togroup("www", switch_group=True)),
         # Key([mod], "e", lazy.group["edit"].toscreen()),
         Key(
-            [mod], "e", lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -c nvim")
+            [mod],
+            "e",
+            lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -i -c nvim"),
         ),
         Key([mod, shift], "e", lazy.window.togroup("edit", switch_group=True)),
         Key(
             [mod],
             "f",
-            lazy.function(group_or_app, "file", terminal + " --class vifm zsh -c vifm"),
+            lazy.function(group_or_app, "file", terminal + " --class vifm zsh -i -c vifm"),
         ),
         Key([mod, shift], "f", lazy.window.togroup("file", switch_group=True)),
         Key([mod], "grave", lazy.group["scratchpad"].dropdown_toggle("term")),
