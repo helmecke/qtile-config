@@ -17,7 +17,6 @@ from libqtile.config import (
 )
 from libqtile.lazy import lazy
 from libqtile.widget.battery import Battery, BatteryState
-
 from monitors import get_monitors
 from xmonad import MonadTall, MonadWide
 
