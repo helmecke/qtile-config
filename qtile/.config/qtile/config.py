@@ -453,6 +453,18 @@ def get_widgets():
         ),
         widget.Spacer(length=13),
         widget.Spacer(length=5),
+        widget.GenPollText(
+            func=lambda: subprocess.check_output(
+                ["timetrace", "status", "--format", "{project} {trackedTimeCurrent}"]
+            )
+            .decode("utf-8")
+            .replace("\n", ""),
+            update_interval=5,
+            mouse_callbacks={
+                "Button1": lazy.spawn("timetrace start hacon"),
+                "Button3": lazy.spawn("timetrace stop"),
+            },
+        ),
         widget.Clock(format=" %H:%M  %d.%m.%Y"),
     ]
 
@@ -464,9 +476,9 @@ if monitors is not None:
         widgets = get_widgets()
 
         if monitor["primary"]:
-            widgets.insert(-2, widget.Systray())
+            widgets.insert(-3, widget.Systray())
         if monitor["name"] == "eDP1":
-            widgets.insert(-2, battery)
+            widgets.insert(-3, battery)
 
         screens.append(
             Screen(
