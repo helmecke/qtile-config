@@ -220,7 +220,16 @@ groups.extend(
             label=" ",
             persist=False,
             init=False,
-            matches=[Match(wm_class=["slack", "Microsoft Teams - Preview"])],
+            matches=[
+                Match(
+                    wm_class=[
+                        "slack",
+                        "Microsoft Teams - Preview",
+                        "Zoom Meeting",
+                        "Zoom Cloud Meetings",
+                    ]
+                )
+            ],
             screen_affinity=1,
         ),
         Group(
