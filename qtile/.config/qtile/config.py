@@ -454,9 +454,8 @@ def get_widgets():
         widget.Spacer(length=13),
         widget.Spacer(length=5),
         widget.GenPollText(
-            func=lambda: subprocess.check_output(
-                ["timetrace", "status", "--format", "{project} {trackedTimeCurrent}"]
-            )
+            fmt="祥 {}",
+            func=lambda: subprocess.check_output(["timetrace", "status", "--format", "{project}"])
             .decode("utf-8")
             .replace("\n", ""),
             update_interval=5,
@@ -465,7 +464,7 @@ def get_widgets():
                 "Button3": lazy.spawn("timetrace stop"),
             },
         ),
-        widget.Clock(format=" %H:%M  %d.%m.%Y"),
+        widget.Clock(format=" %H:%M  %d.%m.%Y"),
     ]
 
 
