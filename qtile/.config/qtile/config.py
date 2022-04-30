@@ -17,6 +17,7 @@ from libqtile.config import (
 )
 from libqtile.lazy import lazy
 from libqtile.widget.battery import Battery, BatteryState
+
 from monitors import get_monitors
 from xmonad import MonadTall, MonadWide
 
@@ -525,7 +526,12 @@ floating_layout = layout.Floating(
 @hook.subscribe.startup_once
 def autostart():
     """Autostart programs."""
-    processes = [["dunst"], ["autorandr", "--change"]]
+    processes = [
+        ["dunst"],
+        ["autorandr", "--change"],
+        ["xrdb", "-merge", "~/.Xresources"],
+        ["synology-drive start"],
+    ]
 
     for p in processes:
         subprocess.Popen(p)
