@@ -451,6 +451,7 @@ def get_widgets():
             txt_maximized="类 ",
             txt_floating="缾 ",
             parse_text=my_tasklist_parse,
+            markup_focused='<span foreground="' + colors["blue"] + '" weight="bold">{}</span>',
         ),
         widget.Spacer(length=13),
         widget.Spacer(length=5),
