@@ -288,7 +288,7 @@ keys.extend(
         Key(
             [mod],
             "e",
-            lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -i -c nvim"),
+            lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -i -c 'nvim --listen ~/.cache/nvim/server.pipe'"),
         ),
         Key([mod, shift], "e", lazy.window.togroup("edit", switch_group=True)),
         Key(
