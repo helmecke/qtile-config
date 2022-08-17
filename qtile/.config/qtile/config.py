@@ -17,7 +17,6 @@ from libqtile.config import (
 )
 from libqtile.lazy import lazy
 from libqtile.widget.battery import Battery, BatteryState
-
 from monitors import get_monitors
 from xmonad import MonadTall, MonadWide
 
@@ -133,7 +132,7 @@ keys = [
     # Toggle between different layouts as defined below
     Key([mod], "Tab", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod, shift], "Tab", lazy.prev_layout(), desc="Toggle between layouts"),
-    Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
+    Key([mod, shift], "q", lazy.window.kill(), desc="Kill focused window"),
     Key([mod, ctrl], "r", lazy.restart(), desc="Restart Qtile"),
     Key([mod, ctrl], "q", lazy.shutdown(), desc="Shutdown Qtile"),
     Key(
@@ -288,7 +287,11 @@ keys.extend(
         Key(
             [mod],
             "e",
-            lazy.function(group_or_app, "edit", terminal + " --class nvr zsh -i -c 'nvim --listen ~/.cache/nvim/server.pipe'"),
+            lazy.function(
+                group_or_app,
+                "edit",
+                terminal + " --class nvr zsh -i -c 'nvim --listen ~/.cache/nvim/server.pipe'",
+            ),
         ),
         Key([mod, shift], "e", lazy.window.togroup("edit", switch_group=True)),
         Key(
@@ -343,6 +346,18 @@ keys.extend(
                             "-c",
                             "gopass ls --flat | rofi -dmenu | xargs --no-run-if-empty -I{} -r "
                             "qtile cmd-obj -o cmd -f spawn -a 'gopass totp --clip {}'",
+                        ]
+                    ),
+                ),
+                Key(
+                    [mod],
+                    "a",
+                    lazy.spawn(
+                        [
+                            "sh",
+                            "-c",
+                            "gopass ls --flat | rofi -dmenu | xargs --no-run-if-empty -I{} -r "
+                            "qtile cmd-obj -o cmd -f spawn -a 'gopass show --clip {} url'",
                         ]
                     ),
                 ),
