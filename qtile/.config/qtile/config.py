@@ -300,7 +300,7 @@ keys.extend(
             lazy.function(group_or_app, "file", terminal + " --class vifm zsh -i -c vifm"),
         ),
         Key([mod, shift], "f", lazy.window.togroup("file", switch_group=True)),
-        Key([mod], "grave", lazy.group["scratchpad"].dropdown_toggle("term")),
+        Key([mod], "t", lazy.group["scratchpad"].dropdown_toggle("term")),
         KeyChord(
             [mod],
             "x",
