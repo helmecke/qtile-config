@@ -539,6 +539,8 @@ floating_layout = layout.Floating(
     ],
 )
 
+cursor_warp = True
+
 
 @hook.subscribe.startup_once
 def autostart():
