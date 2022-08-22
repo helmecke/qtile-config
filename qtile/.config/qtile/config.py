@@ -237,7 +237,10 @@ groups.extend(
             label=" ",
             persist=False,
             init=False,
-            matches=[Match(wm_class=["firefox"]), Match(wm_instance_class=["qutebrowser"])],
+            matches=[
+                Match(wm_class=["firefox", "com.cisco.anyconnect.gui"]),
+                Match(wm_instance_class=["qutebrowser"]),
+            ],
             screen_affinity=0,
         ),
         Group(
